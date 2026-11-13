@@ -1,0 +1,1 @@
+{"name":"controle-tv-ponte-local","version":"2.0.0","private":true,"type":"commonjs","scripts":{"start":"node server.js","test":"node --test"},"dependencies":{"ws":"^8.18.0"},"engines":{"node":">=18"}}

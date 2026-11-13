@@ -1,27 +1,31 @@
-# Controle Universal TV — Vercel (versão estática corrigida)
+# Controle TV — versão de uma tela
 
-Esta versão é **100% estática** (HTML/CSS/JS). Não usa Node.js, Vite, funções serverless, `npm install`, nem `npm run build` no deploy. Não depende de APIs da Vercel para carregar.
+## O que funciona de verdade
 
-## IMPORTANTE: substituir todos os arquivos antigos
+Os botões enviam comandos reais para **Samsung Tizen** (WebSocket 8002) e **LG webOS** (WebSocket 3000/3001), nos modelos que aceitam os respectivos protocolos. É necessário confirmar o pareamento na TV. Nem todas as teclas existem em todos os modelos. Ligar uma TV totalmente desligada pode exigir Wake-on-LAN, que não está implementado.
 
-No repositório do GitHub, na **mesma branch configurada como produção pela Vercel**:
+**A Vercel hospeda apenas a interface.** Por motivos de rede, uma página pública na Vercel não consegue, sozinha, descobrir ou controlar TVs privadas na sua rede. A ponte local resolve isso em um computador com Node.js. Navegadores podem bloquear chamadas HTTPS → localhost ou exigir permissões de rede local. Por isso, **o endereço confiável para controle real é http://127.0.0.1:8765**, no próprio computador com a ponte em execução. No celular, a versão Vercel não controla diretamente por esta arquitetura. Para permitir chamadas de uma origem web específica, pode-se configurar `ALLOWED_ORIGIN=https://seu-projeto.vercel.app` ao iniciar a ponte, mas o navegador pode bloquear chamadas HTTPS para a rede local, e isso não resolve a restrição geral.
 
-1. **Exclua os arquivos antigos do repositório**, incluindo `package.json`, `package-lock.json`, `pacote (1).json`, `server.js`, `env.example`, `baixar`, pastas `api`, `bridge`, `dist` etc. (se existirem). Essa versão publica somente arquivos estáticos.
-2. Adicione os **cinco arquivos da raiz deste ZIP** diretamente na **raiz do repositório**: `index.html`, `src.js`, `style.css`, `vercel.json`, `README.md`. Não envie a pasta que os contém.
-3. Faça commit. Confira se a branch de produção está usando esse commit.
-4. Na Vercel > Project > Settings > Build and Deployment, escolha **Other**, deixe Build Command desativado/vazio e Output Directory sem substituição. Root Directory `./`.
-5. Confira em Settings se não há overrides antigos de Functions, Output ou Build. Faça Redeploy do novo commit **sem cache**.
+## Instalação (Windows, macOS, Linux)
 
-## Como testar
+1. Instale Node.js 20 ou 22 LTS no computador ligado ao mesmo Wi-Fi da TV.
+2. Extraia o ZIP completo. Abra o terminal na pasta `bridge`.
+3. Execute `npm install` e depois `npm start`.
+4. No **mesmo computador**, abra `http://127.0.0.1:8765`.
+5. Clique na engrenagem, informe marca, IP e nome da TV, salve e aceite o pedido na TV.
+6. Pressione os botões. O sistema não tem modo de simulação.
 
-- O endereço público deve apresentar a interface de controle imediatamente.
-- Selecione **Smart TV de demonstração** e experimente os botões: a última ação muda.
-- A lista **Minhas TVs** permite cadastrar TVs, mas o cadastro é apenas visual. Nenhuma TV física será controlada sem integração de rede local.
+Para descobrir o IP, abra as configurações de rede da TV. Prefira reservar o IP no roteador. Samsung: habilite aceitar controle remoto por dispositivos na TV. LG: confirme o diálogo de pareamento.
 
-## Limitação importante
+## Vercel
 
-A Vercel não tem acesso direto à sua rede Wi-Fi ou à televisão. Esta distribuição foi preparada para publicar e testar **a interface** sem erro 500 de função. Para comandos reais, será necessário adicionar uma ponte local autenticada ou uma integração compatível com a marca, desenvolvida e testada separadamente. Esta distribuição **não inclui** a ponte Node.js das versões anteriores.
+Os arquivos `index.html`, `style.css`, `src.js` e `vercel.json` devem ficar **na raiz do GitHub**. O projeto deve utilizar `Framework Preset: Other` e sem build nem output customizados. O `vercel.json` usa `@vercel/static` explicitamente para evitar o erro de ponto de entrada. A pasta `bridge` **não** vira uma função na Vercel.
 
+## Limitações e segurança
 
-## Configuração Vercel – entrada explícita
-A versão desta pasta usa `builds` explícitos em `vercel.json` para publicar index.html, src.js e style.css com `@vercel/static`. No projeto Vercel, configure Root Directory `./`, Framework Other; desative Overrides de Build Command e Output Directory. Confirme branch `main` e novo deploy do commit após substituir os cinco arquivos. Para um projeto novo, importe esta raiz sem criar subpasta.
+- Testado por validações locais de sintaxe e endpoints, mas o pareamento não foi validado em TVs físicas reais.
+- A ponte escuta **apenas** `127.0.0.1`, sem expor acesso remoto. Não faça port forwarding da porta 8765.
+- O arquivo `bridge/.sessions.json`, criado durante o pareamento, guarda credenciais de TV e está protegido pelo `.gitignore`; **nunca publique esse arquivo**.
+- Roku não foi implementado: a documentação atual restringe comandos ECP de plataformas de terceiros.
+- Android/Google TV precisa de outra integração e não está implementado nesta versão.
+- Em LG, o botão de silenciar aplica mute, em vez de alternar. O Play/Pause envia Play, pois a API do modelo pode não ter toggle.
