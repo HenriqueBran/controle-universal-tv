@@ -21,3 +21,7 @@ No repositório do GitHub, na **mesma branch configurada como produção pela Ve
 ## Limitação importante
 
 A Vercel não tem acesso direto à sua rede Wi-Fi ou à televisão. Esta distribuição foi preparada para publicar e testar **a interface** sem erro 500 de função. Para comandos reais, será necessário adicionar uma ponte local autenticada ou uma integração compatível com a marca, desenvolvida e testada separadamente. Esta distribuição **não inclui** a ponte Node.js das versões anteriores.
+
+
+## Configuração Vercel – entrada explícita
+A versão desta pasta usa `builds` explícitos em `vercel.json` para publicar index.html, src.js e style.css com `@vercel/static`. No projeto Vercel, configure Root Directory `./`, Framework Other; desative Overrides de Build Command e Output Directory. Confirme branch `main` e novo deploy do commit após substituir os cinco arquivos. Para um projeto novo, importe esta raiz sem criar subpasta.
